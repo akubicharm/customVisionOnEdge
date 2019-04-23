@@ -12,6 +12,9 @@ import iothub_client
 # pylint: disable=E0611
 from iothub_client import IoTHubModuleClient, IoTHubClientError, IoTHubTransportProvider
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError
+
+from pathlib import Path
+
 # pylint: disable=E0401
 
 # messageTimeout - the maximum time in milliseconds until a message times out.
@@ -76,7 +79,7 @@ class HubManager(object):
             outputQueueName, event, send_confirmation_callback, send_context)
 
 
-def main(imagePath, imageProcessingEndpoint):
+def main0(imagePath, imageProcessingEndpoint):
     try:
         print("Simulated camera module for Azure IoT Edge. Press Ctrl-C to exit.")
 
@@ -94,6 +97,41 @@ def main(imagePath, imageProcessingEndpoint):
                 imagePath, imageProcessingEndpoint)
             send_to_hub(classification)
             time.sleep(10)
+
+    except KeyboardInterrupt:
+        print("IoT Edge module sample stopped")
+
+
+def main(imagePath, imageProcessingEndpoint):
+    # If file exists on the imagePath, then use oldest file and delete it.
+    # If file does not exist, to do nothing.
+
+    try:
+        print("File capture module for Azure IoT Edge. Press Ctrl-C to exit")
+
+        try:
+            global hubManager
+            hubManager = HubManager(PROTOCOL, MESSAGE_TIMEOUT)
+        except IoTHubError as iothub_error:
+            print("Unexpected error %s from IoTHub" % iothub_error)
+            return
+
+        # check file existence
+        if Path(imagePath).parent.exists:
+            dir = Path(imagePath).parent
+        else:
+            return
+
+        print("The sample is now sendint images for processing and will indefinitely.")
+        while True:
+            # classification, send to hub, delete file
+            for f in dir.iterdir():
+                print("Target files : %s " % f)
+                classification = sendFrameForProcessing(
+                    str(f), imageProcessingEndpoint)
+                send_to_hub(classification)
+                time.sleep(10)
+                os.remove(str(f))
 
     except KeyboardInterrupt:
         print("IoT Edge module sample stopped")
