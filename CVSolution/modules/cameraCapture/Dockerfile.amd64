@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 WORKDIR /app
 
-ADD ./test_images.jpg .
+# ADD ./test_images.jpg .
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libcurl4-openssl-dev python3-pip libboost-python1.58-dev libpython3-dev && \
