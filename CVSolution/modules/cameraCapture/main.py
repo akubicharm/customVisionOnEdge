@@ -1,7 +1,3 @@
-# Copyright (c) Microsoft. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for
-# full license information.
-
 import time
 import sys
 import os
@@ -79,29 +75,6 @@ class HubManager(object):
             outputQueueName, event, send_confirmation_callback, send_context)
 
 
-def main0(imagePath, imageProcessingEndpoint):
-    try:
-        print("Simulated camera module for Azure IoT Edge. Press Ctrl-C to exit.")
-
-        try:
-            global hubManager
-            hubManager = HubManager(PROTOCOL, MESSAGE_TIMEOUT)
-        except IoTHubError as iothub_error:
-            print("Unexpected error %s from IoTHub" % iothub_error)
-            return
-
-        print("The sample is now sending images for processing and will indefinitely.")
-
-        while True:
-            classification = sendFrameForProcessing(
-                imagePath, imageProcessingEndpoint)
-            send_to_hub(classification)
-            time.sleep(10)
-
-    except KeyboardInterrupt:
-        print("IoT Edge module sample stopped")
-
-
 def main(imagePath, imageProcessingEndpoint):
     # If file exists on the imagePath, then use oldest file and delete it.
     # If file does not exist, to do nothing.
@@ -117,8 +90,8 @@ def main(imagePath, imageProcessingEndpoint):
             return
 
         # check file existence
-        if Path(imagePath).parent.exists:
-            dir = Path(imagePath).parent
+        if Path(imagePath).exists:
+            dir = Path(imagePath)
         else:
             return
 

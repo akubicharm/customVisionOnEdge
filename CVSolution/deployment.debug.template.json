@@ -112,6 +112,64 @@
                 }
               }
             }
+          },
+          "pictuploader": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.pictuploader.debug}",
+              "createOptions": {
+                "ExposedPorts": {
+                  "5678/tcp": {}
+                },
+                "HostConfig": {
+                  "PortBindings": {
+                    "5678/tcp": [
+                      {
+                        "HostPort": "5678"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "sendSlackMsgFunc": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.sendSlackMsgFunc.debug}",
+              "createOptions": {}
+            }
+          },
+          "asaonedge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azure-stream-analytics/azureiotedge:1.0.2",
+              "createOptions": {}
+            },
+            "env": {
+              "PlanId": {
+                "value": "stream-analytics-on-iot-edge"
+              }
+            }
+          },
+          "slackFunc": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.slackFunc.debug}",
+              "createOptions": {}
+            }
           }
         }
       }
@@ -122,11 +180,23 @@
         "routes": {
           "classifierToIoTHub": "FROM /messages/modules/classifier/outputs/* INTO $upstream",
           "sensorToclassifier": "FROM /messages/modules/tempSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/classifier/inputs/input1\")",
-          "cameraCaptureToIoTHub": "FROM /messages/modules/cameraCapture/outputs/* INTO $upstream"
+          "cameraCaptureToIoTHub": "FROM /messages/modules/cameraCapture/outputs/* INTO $upstream",
+          "pictuploaderToIoTHub": "FROM /messages/modules/pictuploader/outputs/* INTO $upstream",
+          "sendSlackMsgFuncToIoTHub": "FROM /messages/modules/sendSlackMsgFunc/outputs/* INTO $upstream",
+          "asaonedgeToIoTHub": "FROM /messages/modules/asaonedge/outputs/* INTO $upstream",
+          "slackFuncToIoTHub": "FROM /messages/modules/slackFunc/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
+      }
+    },
+    "asaonedge": {
+      "properties.desired": {
+        "ASAJobInfo": "https://hpediag924.blob.core.windows.net/asaonedge/ASAEdgeJobs/29920ab4-b20f-4a5c-87dd-bc70b8058431/64d0290b-6ae9-4aab-b4bc-2b2331379973/ASAEdgeJobDefinition.zip?sv=2018-03-28&sr=b&sig=w53penrOATNTlj4z0J8hz7EHJEahu1Jc5d14xqT87zA%3D&st=2019-04-24T06%3A19%3A03Z&se=2022-04-24T06%3A29%3A03Z&sp=r",
+        "ASAJobResourceId": "/subscriptions/93677bcc-692d-4de6-85b2-89c1bfe6e213/resourceGroups/hpe/providers/Microsoft.StreamAnalytics/streamingjobs/hpeedge",
+        "ASAJobEtag": "508fa879-69f5-49f3-90c3-ddbc87740339",
+        "PublishTimestamp": "4/24/2019 6:29:03 AM"
       }
     }
   }
